@@ -9,6 +9,10 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <unistd.h>
+#include <time.h>
+
+#define MAX 5 
+int cpt = 0;
 
 int sem;
 int mem;
@@ -31,7 +35,7 @@ int main(void)
         exit(1);
     }
 
-    clef = ftok("principal.c", 'A');
+    clef = ftok("principal.c", 'B');
     mem = shmget(clef, sizeof(int), IPC_CREAT | 0666);
     if (mem == -1)
     {
@@ -40,16 +44,18 @@ int main(void)
     }
     T = shmat(mem, 0, 0);
     int Mp;
+    srand(time(NULL));
     do
     {
-        Mp = 4 + 5;
+        Mp = rand() % 100;
         semop(sem, &Psvide, 1);
         *T = Mp;
-        printf("('le producteur vient de déposer un objet : %d\n", Mp);
+        printf("le producteur vient de déposer un objet : %d\n", Mp);
+        cpt++;
         semop(sem, &Vsplein, 1);
         sleep(1); 
 
-    } while (0);
+    } while (cpt < MAX);
 
     shmdt(T);
 
